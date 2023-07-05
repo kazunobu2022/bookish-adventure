@@ -1,0 +1,289 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        Label:
+          default: VPC
+        Parameters:
+          - VPCName
+          - VpcCIDR
+      -
+        Label:
+          default: InternetGateway
+        Parameters:
+          - InternetGatewayName
+      -
+        Label:
+          default:  PublicSubnet
+        Parameters:
+          - PubSubName1
+          - PubSubCIDR1
+          - PubSubAZ1
+          - PubSubName2
+          - PubSubCIDR2
+          - PubSubAZ2
+      -
+        Label:
+          default:  PrivateSubnet
+        Parameters:
+        - PriSubName1
+        - PriSubCIDR1
+        - PriSubAZ1
+        - PriSubName2
+        - PriSubCIDR2
+        - PriSubAZ2
+      -
+        Label:
+          default:  RouteTable
+        Parameters:
+        - PubSubRTBName1
+        - PubSubRTBName2
+        - PriSubRTBName1
+        - PriSubRTBName2
+Parameters:
+# ------------------------------------------------------------#
+#  VPC
+# ------------------------------------------------------------#    
+# VPC
+  VPCName:
+    Type: String
+    Default: 'VPCName' 
+
+  VpcCIDR:
+    Type: String
+    Default: 10.0.0.0/16
+# ------------------------------------------------------------#
+#  InternetGateway
+# ------------------------------------------------------------#  
+# InternetGateway
+  InternetGatewayName:
+    Type: String
+    Default: 'InternetGatewayName'
+# ------------------------------------------------------------#
+#  Subnet
+# ------------------------------------------------------------#    
+# PublicSubnet
+  PubSubName1:
+    Type: String
+    Default: 'PubSubName1'
+
+  PubSubCIDR1:
+    Type: String
+    Default: 10.0.0.0/24
+  
+  PubSubAZ1:
+    Type: String
+    Default: 'ap-northeast-1a'
+
+  PubSubName2:
+    Type: String
+    Default: 'PubSubName2'
+
+  PubSubCIDR2:
+    Type: String
+    Default: 10.0.1.0/24
+  
+  PubSubAZ2:
+    Type: String
+    Default: 'ap-northeast-1c'
+# PrilicSubnet
+  PriSubName1:
+    Type: String
+    Default: 'PriSubName1'
+
+  PriSubCIDR1:
+    Type: String
+    Default: 10.0.2.0/24
+  
+  PriSubAZ1:
+    Type: String
+    Default: 'ap-northeast-1a'
+
+  PriSubName2:
+    Type: String
+    Default: 'PriSubName2'
+
+  PriSubCIDR2:
+    Type: String
+    Default: 10.0.3.0/24
+  
+  PriSubAZ2:
+    Type: String
+    Default: 'ap-northeast-1c'
+# ------------------------------------------------------------#
+#  RouteTable
+# ------------------------------------------------------------#    
+  PubSubRTBName1:
+    Type: String
+    Default: 'PubSubRTBName1'
+  
+  PubSubRTBName2:
+    Type: String
+    Default: 'PubSubRTBName2'
+  
+  PriSubRTBName1:
+    Type: String
+    Default: 'PriSubRTBName1'
+
+  PriSubRTBName2:
+    Type: String
+    Default: 'PriSubRTBName2'
+
+Resources:
+# ------------------------------------------------------------#
+#  VPC
+# ------------------------------------------------------------#    
+# VPC
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCIDR
+      Tags:
+        - Key: Name
+          Value: !Ref VPCName
+# ------------------------------------------------------------#
+#  InternetGateway
+# ------------------------------------------------------------#    
+# InternetGateway
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+      - Key: Name
+        Value: !Ref InternetGatewayName
+  # IGW Attach
+  InternetGatewayAttachment: 
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties: 
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC 
+# ------------------------------------------------------------#
+#  Subnet
+# ------------------------------------------------------------#    
+# PublicSubnet
+  PubSub1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: VPC
+      CidrBlock: !Ref PubSubCIDR1
+      AvailabilityZone: !Ref PubSubAZ1
+      Tags:
+      - Key: Name
+        Value: !Ref PubSubName1
+  PubSub2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: VPC
+      CidrBlock: !Ref PubSubCIDR2
+      AvailabilityZone: !Ref PubSubAZ2
+      Tags:
+      - Key: Name
+        Value: !Ref PubSubName2
+#  PrivateSubnet
+  PriSub1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: VPC
+      CidrBlock: !Ref PriSubCIDR1
+      AvailabilityZone: !Ref PriSubAZ1
+      Tags:
+      - Key: Name
+        Value: !Ref PriSubName1
+  PriSub2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: VPC
+      CidrBlock: !Ref PriSubCIDR2
+      AvailabilityZone: !Ref PriSubAZ2
+      Tags:
+      - Key: Name
+        Value: !Ref PriSubName2
+# ------------------------------------------------------------#
+#  RouteTable
+# ------------------------------------------------------------#    
+# PublicSub-Routetable
+  PubSubRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:  
+        Ref: VPC
+      Tags:
+      - Key: Name
+        Value: !Ref PubSubRTBName1
+
+  PubSubRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:  
+        Ref: VPC
+      Tags:
+      - Key: Name
+        Value: !Ref PubSubRTBName2
+# PrivateSub-Routetable
+  PriSubRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:  
+        Ref: VPC
+      Tags:
+      - Key: Name
+        Value: !Ref PriSubRTBName1
+
+  PriSubRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:  
+        Ref: VPC
+      Tags:
+      - Key: Name
+        Value: !Ref PriSubRTBName2
+
+# ------------------------------------------------------------#
+# Routing
+# ------------------------------------------------------------# 
+# PublicRouteA Create
+  PublicRoute1: 
+    Type: "AWS::EC2::Route"
+    Properties: 
+      RouteTableId: !Ref PubSubRouteTable1
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref InternetGateway
+  
+  PublicRoute2: 
+    Type: "AWS::EC2::Route"
+    Properties: 
+      RouteTableId: !Ref PubSubRouteTable2
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref InternetGateway
+# ------------------------------------------------------------#
+# RouteTable Associate
+# ------------------------------------------------------------# 
+# PublicRouteTable Associate Subnet
+  PublicSubnetARouteTableAssociation: 
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties: 
+      SubnetId: !Ref PubSub1
+      RouteTableId: !Ref PubSubRouteTable1
+
+  PublicSubnetCRouteTableAssociation: 
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties: 
+      SubnetId: !Ref PubSub2
+      RouteTableId: !Ref PubSubRouteTable2
+# PrivateRouteTable Associate Subnet
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties: 
+      SubnetId: !Ref PriSub1
+      RouteTableId: !Ref PriSubRouteTable1
+
+  PrivateSubnetCRouteTableAssociation: 
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties: 
+      SubnetId: !Ref PriSub2
+      RouteTableId: !Ref PriSubRouteTable2

@@ -1,0 +1,61 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        Label:
+          default: SecurityGroup
+        Parameters:
+          - SgName1
+          - VpcId
+          - SgIngFromPort1
+          - SgIngCidrIp1
+          - SgIngFromPort2
+          - SgIngCidrIp2
+
+Parameters:
+  SgName1:
+      Type: String
+      Default: 'SgName1'  
+
+  VpcId:
+      Type: AWS::EC2::VPC::Id
+  
+  SgIngCidrIp1:
+      Type: String
+      Default: '0.0.0.0/0'  
+
+  SgIngFromPort1:
+    Type: String
+    Default: '80' 
+
+  SgIngCidrIp2:
+    Type: String
+    Default: '0.0.0.0/0' 
+
+  SgIngFromPort2:
+    Type: String
+    Default: '22' 
+
+Resources:   
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Ref SgName1
+      GroupDescription: Allow http to client host
+      VpcId: !Ref VpcId
+      # アウトバウンド設定（フルオープン）
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          IpProtocol: -1
+      # インバウンド設定
+      SecurityGroupIngress:
+        - CidrIp: !Ref SgIngCidrIp1
+          FromPort: !Ref SgIngFromPort1
+          IpProtocol: tcp
+          ToPort: !Ref SgIngFromPort1
+        - CidrIp: !Ref SgIngCidrIp2
+          FromPort: !Ref SgIngFromPort2
+          IpProtocol: tcp
+          ToPort: !Ref SgIngFromPort2
